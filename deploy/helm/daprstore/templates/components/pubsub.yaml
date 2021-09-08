@@ -5,9 +5,10 @@ metadata:
   name: {{ .Values.daprComponents.pubsub.name }}
 spec:
   type: pubsub.redis
+  version: v1
   metadata:
   - name: redisHost
     value: {{ .Values.daprComponents.pubsub.redisHost }}
   - name: redisPassword
-    value: ""
+    value: wtMWWJjV53
 {{ end }}

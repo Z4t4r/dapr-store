@@ -1,0 +1,52 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: cartapp
+  labels:
+    app: cart
+spec:
+  selector:
+    app: cart
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+      nodePort: 32000
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cartapp
+  labels:
+    app: cart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cart
+  template:
+    metadata:
+      labels:
+        app: cart
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "cartapp"
+        dapr.io/port: "6000"
+        dapr.io/config: "appconfig"
+    spec:
+      containers:
+        - name: cart
+          image: ccr.ccs.tencentyun.com/v4ni11a/cart:latest
+          ports:
+            - containerPort: 6000
+          imagePullPolicy: Always
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                      - linux

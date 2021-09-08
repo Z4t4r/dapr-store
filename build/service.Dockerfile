@@ -7,6 +7,7 @@ ARG SERVICE_NAME="SET_ON_COMMAND_LINE"
 ARG VERSION="0.0.1"
 ARG BUILD_INFO="Not provided"
 ARG CGO_ENABLED=0
+ARG GOPROXY=https://goproxy.cn,direct
 
 WORKDIR /build
 
@@ -24,7 +25,7 @@ COPY pkg/ ./pkg/
 
 # Now run the build
 # Inject version and build details, to be available at runtime 
-RUN GO111MODULE=on CGO_ENABLED=$CGO_ENABLED GOOS=linux \
+RUN GO111MODULE=on CGO_ENABLED=$CGO_ENABLED GOOS=linux  \
 go build \
 -ldflags "-X main.version=$VERSION -X 'main.buildInfo=$BUILD_INFO'" \
 -o server github.com/benc-uk/dapr-store/cmd/${SERVICE_NAME}
