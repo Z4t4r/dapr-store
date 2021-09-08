@@ -4,7 +4,7 @@
 FROM golang:1.16-alpine as server-build
 
 WORKDIR /build
-
+ARG GOPROXY=https://goproxy.cn,direct
 # Install system dependencies
 #RUN apk update && apk add git gcc musl-dev
 

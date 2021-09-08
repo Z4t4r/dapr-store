@@ -57,6 +57,7 @@ image-all2:
 	make image-products
 	make image-orders
 	make image-users
+	make image-frontend
 echo-all:
 	$(foreach n,$(IMAGE_LIST),make image-$n)
 image-cart:
