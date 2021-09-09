@@ -7,9 +7,11 @@
 
 package spec
 
+import "gorm.io/gorm"
+
 // Product holds product data
 type Product struct {
-	ID          string  `json:"id"`
+	gorm.Model
 	Name        string  `json:"name"`
 	Cost        float32 `json:"cost"`
 	Description string  `json:"description"`

@@ -34,8 +34,10 @@ spec:
         image: {{ .Values.image.registry }}/{{ .Values.image.repo }}/products:{{ .Values.image.tag }}
         imagePullPolicy: Always
 
-        {{- if .Values.auth.clientId }}
         env:
+          - name: MYSQL
+            value: {{ .Values.mysql.connection}}
+        {{- if .Values.auth.clientId }}
           - name: AUTH_CLIENT_ID
             value: {{ .Values.auth.clientId }}
         {{- end }} 

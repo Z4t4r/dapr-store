@@ -11,6 +11,9 @@ image:
 auth:
   clientId:
 
+mysql:
+  connection:
+
 ingress:
   host:
   certName:

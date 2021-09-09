@@ -10,6 +10,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/benc-uk/dapr-store/pkg/dapr"
 	"log"
 	"net/http"
 	"os"
@@ -25,7 +26,12 @@ import (
 var (
 	defaultStaticPath = "./dist" // Change with env: STATIC_DIR
 	defaultPort       = 8000     // Change with env: PORT
+	serviceName = "frontend"
+	healthy     = true               // Simple health flag
+	version     = "0.0.1"            // App version number, set at build time with -ldflags "-X 'main.version=1.2.3'"
+	buildInfo   = "No build details"
 )
+
 
 // spaHandler implements the http.Handler interface, so we can use it
 // to respond to HTTP requests. The path to the static directory and
@@ -75,6 +81,10 @@ func main() {
 	log.Printf("### Dapr Store: frontend host starting...")
 
 	router := mux.NewRouter()
+	helper := dapr.NewHelper(serviceName)
+	if helper == nil {
+		os.Exit(1)
+	}
 
 	router.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		// an example API handler
@@ -120,4 +130,21 @@ func routeConfig(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Access-Control-Allow-Origin", "*")
 	resp.Header().Add("Content-Type", "application/json")
 	_, _ = resp.Write([]byte(configJSON))
+}
+
+func products(resp http.ResponseWriter, req *http.Request){
+	helper := dapr.NewHelper(serviceName)
+	if helper == nil {
+		os.Exit(1)
+	}
+	result,err := helper.InvokeGet("products","AllProducts")
+	if err != nil {
+		panic(err)
+	}
+	defer result.Body.Close()
+	resp.Header().Set("Access-Control-Allow-Origin", "*")
+	resp.Header().Add("Content-Type", "application/json")
+	var bs []byte
+	result.Body.Read(bs)
+	_, _ = resp.Write(bs)
 }

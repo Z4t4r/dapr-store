@@ -77,6 +77,10 @@ image-products:
 	--build-arg CGO_ENABLED=1 \
 	-t $(IMAGE_PREFIX)/products:$(IMAGE_TAG)
 
+makepush-products:
+	make image-products
+	docker push $(IMAGE_PREFIX)/products:$(IMAGE_TAG)
+
 image-users:
 	docker build . -f build/service.Dockerfile \
 	--build-arg VERSION=$(VERSION) \

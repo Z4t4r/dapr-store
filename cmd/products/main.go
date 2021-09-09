@@ -18,7 +18,6 @@ import (
 	"github.com/benc-uk/dapr-store/cmd/products/spec"
 	"github.com/benc-uk/dapr-store/pkg/api"
 	"github.com/benc-uk/dapr-store/pkg/env"
-
 	"github.com/gorilla/mux"
 	_ "github.com/joho/godotenv/autoload" // Autoloads .env file if it exists
 	_ "github.com/mattn/go-sqlite3"
@@ -51,15 +50,15 @@ func main() {
 	// Use gorilla/mux for routing
 	router := mux.NewRouter()
 
-	dbFilePath := "./sqlite.db"
-	if len(os.Args) > 1 {
-		dbFilePath = os.Args[1]
-	}
-
+	//dbFilePath := "./sqlite.db"
+	//if len(os.Args) > 1 {
+	//	dbFilePath = os.Args[1]
+	//}
+	sdn := env.GetEnvString("MYSQL","localhost")
 	// Wrapper API with anonymous inner new Base API
 	api := API{
 		api.NewBase(serviceName, version, buildInfo, healthy, router),
-		impl.NewService(serviceName, dbFilePath),
+		impl.NewService(serviceName, sdn),
 	}
 
 	// Add routes for this service

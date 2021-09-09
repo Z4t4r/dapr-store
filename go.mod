@@ -10,4 +10,6 @@ require (
 	github.com/lestrrat-go/jwx v1.0.3
 	github.com/mattn/go-sqlite3 v1.14.0
 	github.com/stretchr/testify v1.7.0 // indirect
+	gorm.io/driver/mysql v1.1.2
+	gorm.io/gorm v1.21.14
 )
