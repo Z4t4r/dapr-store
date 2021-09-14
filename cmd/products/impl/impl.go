@@ -8,22 +8,21 @@
 package impl
 
 import (
+	"context"
 	"database/sql"
-	"github.com/benc-uk/dapr-store/pkg/dapr"
-	"github.com/benc-uk/dapr-store/pkg/env"
-	"log"
-	"os"
-
+	"encoding/json"
 	"github.com/benc-uk/dapr-store/cmd/products/spec"
+	"github.com/benc-uk/dapr-store/pkg/env"
 	"github.com/benc-uk/dapr-store/pkg/problem"
+	"github.com/dapr/go-sdk/service/common"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"log"
 )
 
 // ProductService is a Dapr based implementation of ProductService interface
 type ProductService struct {
 	*gorm.DB
-	*dapr.Helper
 	pubSubName string
 	topicName  string
 	storeName  string
@@ -31,14 +30,8 @@ type ProductService struct {
 }
 
 // NewService creates a new ProductService
-func NewService(serviceName string, dsn string) *ProductService {
-	// Note force rw mode here, otherwise it creates an empty DB if file not found
-	//db, err := sql.Open("sqlite3", fmt.Sprintf("file:%s?mode=rw", dbFilePath))
+func NewService(serviceName string, dsn string) (out *ProductService) {
 
-	helper := dapr.NewHelper(serviceName)
-	if helper == nil {
-		os.Exit(1)
-	}
 	topicName := env.GetEnvString("DAPR_ORDERS_TOPIC", "orders-queue")
 	storeName := env.GetEnvString("DAPR_STORE_NAME", "statestore")
 	pubSubName := env.GetEnvString("DAPR_PUBSUB_NAME", "pubsub")
@@ -55,14 +48,14 @@ func NewService(serviceName string, dsn string) *ProductService {
 			Description: "Description1",
 			OnOffer: true,
 		})
-	}
-	db.Create(&spec.Product{
-		Name: "Product2",
-		Cost: 2,
-		Description: "Description2",
-		OnOffer: true,
-	})
+		db.Create(&spec.Product{
+			Name: "Product2",
+			Cost: 2,
+			Description: "Description2",
+			OnOffer: true,
+		})
 
+	}
 
 
 	if err != nil {
@@ -72,15 +65,14 @@ func NewService(serviceName string, dsn string) *ProductService {
 
 	log.Printf("### Database %s opened OK\n", dsn)
 
-	return &ProductService{
+	out = &ProductService{
 		db,
-		helper,
 		pubSubName,
 		topicName,
 		storeName,
 		serviceName,
-
 	}
+	return
 }
 
 // QueryProducts is a simple SQL WHERE query on a single column
@@ -98,15 +90,20 @@ func (s ProductService) QueryProducts(column, term string) ([]spec.Product, erro
 }
 
 // AllProducts returns all products from the DB, yeah this is pretty dumb
-func (s ProductService) AllProducts() ([]spec.Product, error) {
+func (s ProductService) AllProducts(ctx context.Context,in *common.InvocationEvent)  (out *common.Content, err error) {
 	var products []spec.Product
 	result := s.First(&products)
 	if result.Error != nil {
 		prob := problem.New("err://products-db", "Database query error", 500, result.Error.Error(), s.serviceName)
 		return nil, prob
 	}
-
-	return products,result.Error
+	js,err := json.Marshal(products)
+	out = &common.Content{
+		Data: js,
+		ContentType: in.ContentType,
+		DataTypeURL: in.DataTypeURL,
+	}
+	return
 }
 
 // SearchProducts is a text search in name or  product description

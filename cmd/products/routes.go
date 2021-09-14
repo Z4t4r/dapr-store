@@ -8,7 +8,9 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/benc-uk/dapr-store/pkg/problem"
@@ -18,11 +20,22 @@ import (
 //
 // All routes we need should be registered here
 //
+func (api API) daprdServerInit(ctx context.Context){
+	if err := api.daprService.AddServiceInvocationHandler("allProducts",api.service.AllProducts); err != nil{
+		log.Fatalf("error adding invocation handler: %v", err)
+	}
+	if err := api.daprService.Start(); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("error listenning: %v", err)
+	}
+
+}
 func (api API) addRoutes(router *mux.Router) {
-	router.HandleFunc("/get/{id}", api.getProduct)
-	router.HandleFunc("/catalog", api.getCatalog)
-	router.HandleFunc("/offers", api.getOffers)
-	router.HandleFunc("/search/{query}", api.searchProducts)
+
+
+	//router.HandleFunc("/get/{id}", api.getProduct)
+	//router.HandleFunc("/catalog", api.getCatalog)
+	//router.HandleFunc("/offers", api.getOffers)
+	//router.HandleFunc("/search/{query}", api.searchProducts)
 }
 
 //
@@ -48,23 +61,6 @@ func (api API) getProduct(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Content-Type", "application/json")
 	_, _ = resp.Write(json)
 }
-
-//
-// Return the product catalog
-//
-func (api API) getCatalog(resp http.ResponseWriter, req *http.Request) {
-	products, err := api.service.AllProducts()
-	if err != nil {
-		prob := err.(*problem.Problem)
-		prob.Send(resp)
-		return
-	}
-
-	json, _ := json.Marshal(products)
-	resp.Header().Set("Content-Type", "application/json")
-	_, _ = resp.Write(json)
-}
-
 //
 // Return the products on offer
 //

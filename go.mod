@@ -3,6 +3,7 @@ module github.com/benc-uk/dapr-store
 go 1.16
 
 require (
+	github.com/dapr/go-sdk v1.2.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gorilla/mux v1.8.0

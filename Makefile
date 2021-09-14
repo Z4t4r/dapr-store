@@ -81,6 +81,10 @@ makepush-products:
 	make image-products
 	docker push $(IMAGE_PREFIX)/products:$(IMAGE_TAG)
 
+makepush-frontend:
+	make image-frontend
+	docker push $(IMAGE_PREFIX)/frontend-host:$(IMAGE_TAG)
+
 image-users:
 	docker build . -f build/service.Dockerfile \
 	--build-arg VERSION=$(VERSION) \

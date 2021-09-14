@@ -17,6 +17,9 @@ spec:
         daprstore: frontend-host
         {{- include "daprstore.selectorLabels" . | nindent 8 }}
       annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "frontend"
+        dapr.io/app-port: "9005"
       {{- with .Values.frontendHost.annotations }}
           {{- toYaml . | nindent 8 }}
       {{- end }}            

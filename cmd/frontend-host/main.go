@@ -8,9 +8,11 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/benc-uk/dapr-store/pkg/dapr"
+	dapr "github.com/dapr/go-sdk/client"
+	daprd "github.com/dapr/go-sdk/service/grpc"
 	"log"
 	"net/http"
 	"os"
@@ -30,6 +32,8 @@ var (
 	healthy     = true               // Simple health flag
 	version     = "0.0.1"            // App version number, set at build time with -ldflags "-X 'main.version=1.2.3'"
 	buildInfo   = "No build details"
+	daprdPort = 9005
+	ctx = context.Background()
 )
 
 
@@ -81,11 +85,6 @@ func main() {
 	log.Printf("### Dapr Store: frontend host starting...")
 
 	router := mux.NewRouter()
-	helper := dapr.NewHelper(serviceName)
-	if helper == nil {
-		os.Exit(1)
-	}
-
 	router.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		// an example API handler
 		err := json.NewEncoder(w).Encode(map[string]bool{"ok": true})
@@ -93,7 +92,10 @@ func main() {
 			log.Printf("### Problem with healthz endpoint %s\n", err)
 		}
 	})
-
+	d,err := daprd.NewService(":"+fmt.Sprintf("%v",daprdPort))
+	if err != nil{
+		panic(err)
+	}
 	staticPath := env.GetEnvString("STATIC_DIR", defaultStaticPath)
 	spa := spaHandler{
 		staticPath: staticPath,
@@ -101,10 +103,16 @@ func main() {
 	}
 
 	router.HandleFunc("/config", routeConfig)
+	router.HandleFunc("/v1.0/invoke/products/method/catalog",getProducts)
 	router.PathPrefix("/").Handler(spa)
 
 	serverPort := env.GetEnvInt("PORT", defaultPort)
 
+	go func() {
+		if err :=  d.Start(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("error listenning: %v", err)
+		}
+	}()
 	srv := &http.Server{
 		Handler:      router,
 		Addr:         fmt.Sprintf(":%d", serverPort),
@@ -132,19 +140,19 @@ func routeConfig(resp http.ResponseWriter, req *http.Request) {
 	_, _ = resp.Write([]byte(configJSON))
 }
 
-func products(resp http.ResponseWriter, req *http.Request){
-	helper := dapr.NewHelper(serviceName)
-	if helper == nil {
-		os.Exit(1)
-	}
-	result,err := helper.InvokeGet("products","AllProducts")
+func getProducts(resp http.ResponseWriter, req *http.Request){
+	client, err := dapr.NewClient()
 	if err != nil {
 		panic(err)
 	}
-	defer result.Body.Close()
+	defer client.Close()
+
+	result,err := client.InvokeMethod(ctx,"products","allProducts","post")
+	if err!= nil{
+		log.Printf("%+v\n", result)
+		panic(err)
+	}
 	resp.Header().Set("Access-Control-Allow-Origin", "*")
 	resp.Header().Add("Content-Type", "application/json")
-	var bs []byte
-	result.Body.Read(bs)
-	_, _ = resp.Write(bs)
+	_, _ = resp.Write(result)
 }

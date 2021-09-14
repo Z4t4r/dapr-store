@@ -7,7 +7,11 @@
 
 package spec
 
-import "gorm.io/gorm"
+import (
+	"context"
+	"github.com/dapr/go-sdk/service/common"
+	"gorm.io/gorm"
+)
 
 // Product holds product data
 type Product struct {
@@ -23,5 +27,5 @@ type Product struct {
 type ProductService interface {
 	SearchProducts(string) ([]Product, error)
 	QueryProducts(string, string) ([]Product, error)
-	AllProducts() ([]Product, error)
+	AllProducts(ctx context.Context,in *common.InvocationEvent)  (out *common.Content, err error)
 }
