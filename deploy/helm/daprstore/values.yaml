@@ -3,8 +3,8 @@
 #
 
 image:
-  registry: ghcr.io
-  repo: benc-uk/daprstore
+  registry: ccr.ccs.tencentyun.com
+  repo: v4ni11a
   tag: latest
   pullSecrets: []
 
@@ -43,6 +43,7 @@ frontendHost:
 
 daprComponents:
   deploy: true
+  version: v1
   state:
     name: statestore
     redisHost: daprstore-redis-master:6379

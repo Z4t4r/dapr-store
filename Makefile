@@ -9,8 +9,8 @@ REPO_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 GOLINT_PATH := $(REPO_DIR)/bin/golangci-lint
 
 # Most likely want to override these when calling `make image-all`
-IMAGE_REG ?= ghcr.io
-IMAGE_REPO ?= benc-uk/daprstore
+IMAGE_REG ?= ccr.ccs.tencentyun.com
+IMAGE_REPO ?= v4ni11a
 IMAGE_TAG ?= latest
 IMAGE_PREFIX := $(IMAGE_REG)/$(IMAGE_REPO)
 IMAGE_LIST := cart orders users products frontend
@@ -49,9 +49,11 @@ test-snapshot:  ## 📷 Update snapshots for frontend tests
 	@cd $(FRONTEND_DIR); NODE_ENV=test npm run test-update
 
 image-all:      ## 📦 Build all container images
-	for img in $(IMAGE_LIST); do \
-		make image-$$img ; \
-	done
+	make image-cart
+	make image-products
+	make image-users
+	make image-orders
+	make image-frontend
 
 image-cart:
 	docker build . -f build/service.Dockerfile \

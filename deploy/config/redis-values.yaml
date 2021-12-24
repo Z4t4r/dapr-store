@@ -8,8 +8,10 @@ fullnameOverride: daprstore-redis
 enabled: true
 
 # This is assumed by the Dapr components, and keeps it simple
-usePassword: false
-
+#usePassword: false
+global:
+  redis:
+    password: "12345678"
 # Don't need multiple pods
 cluster:
   enabled: false

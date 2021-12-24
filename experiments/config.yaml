@@ -3,6 +3,7 @@ kind: Configuration
 metadata:
   name: custom-config
 spec:
+  version: v1
   httpPipeline:
     handlers:
       - name: uppercase

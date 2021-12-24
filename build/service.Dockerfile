@@ -7,6 +7,9 @@ ARG SERVICE_NAME="SET_ON_COMMAND_LINE"
 ARG VERSION="0.0.1"
 ARG BUILD_INFO="Not provided"
 ARG CGO_ENABLED=0
+ARG GOPROXY=https://goproxy.cn,direct
+
+#ENV GOPROXY=https://goproxy.cn
 
 WORKDIR /build
 

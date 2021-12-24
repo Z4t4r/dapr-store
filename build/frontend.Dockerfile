@@ -8,6 +8,7 @@ WORKDIR /build
 # Install system dependencies
 #RUN apk update && apk add git gcc musl-dev
 
+ENV GOPROXY=https://goproxy.cn
 # Fetch and cache Go modules
 COPY go.mod .
 COPY go.sum .
@@ -28,9 +29,9 @@ FROM node:14-alpine as frontend-build
 
 ARG VERSION="0.0.1"
 ARG BUILD_INFO="Not provided"
-
 ENV VUE_APP_BUILD_INFO=${BUILD_INFO}
 WORKDIR /build
+
 
 # Install all the Vue.js dev tools & CLI, and our app dependencies 
 COPY web/frontend/package*.json ./

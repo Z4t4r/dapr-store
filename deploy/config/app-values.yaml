@@ -5,8 +5,8 @@
 
 # Mostly don't change these, unless you've built and pushed your own images
 image:
-  registry: ghcr.io
-  repo: benc-uk/daprstore
+  registry: ccr.ccs.tencentyun.com
+  repo: v4ni11a
   tag: latest
 
 # Leave blank to disable authentication, which is the default
